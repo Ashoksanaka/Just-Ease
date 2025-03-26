@@ -3,7 +3,7 @@
 import os
 import sys
 
-
+# Django command-line tool
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
