@@ -1,0 +1,29 @@
+# Ignore Python virtual environment
+venv/
+Justice/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore database (if SQLite, since you're using PostgreSQL)
+db.sqlite3
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore Django static and media files
+staticfiles/
+media/
+
+# Ignore Node.js dependencies
+frontend/node_modules/
+frontend/.next/
+frontend/build/
+
+# Ignore environment variables
+.env
+.env.local
+
