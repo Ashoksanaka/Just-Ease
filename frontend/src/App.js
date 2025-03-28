@@ -1,17 +1,21 @@
-
-// Root React component
-
-
 import React from "react";
-import LoginForm from "./components/LoginForm";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import WelcomePage from "./components/WelcomePage";
+import LawyerLoginPage from "./components/LawyerHomePage";
+import VictimLoginPage from "./components/VictimHomePage";
+import VictimSignupPage from "./components/VictimSignupPage";
 
-function App() {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <LoginForm />
-        </div>
-    );
-}
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/lawyer" element={<LawyerLoginPage />} />
+        <Route path="/victim" element={<VictimLoginPage />} />
+        <Route path="/victim-signup" element={<VictimSignupPage />} />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App;
-
