@@ -1,11 +1,50 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const VictimLoginPage = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    console.log("Sending login request with data:", formData);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/users/login/",
+        formData
+      );
+      console.log("Login response:", response.data);
+
+      // Store authentication data in localStorage
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("refresh", response.data.refresh);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      // Redirect to dashboard
+      navigate("/victim-dashboard");
+    } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+      setError(err.response?.data?.error || "Login failed. Please try again.");
+    }
+  };
 
   const handleCreateAccount = () => {
-    navigate("/victim-signup"); // Redirect to the signup page
+    navigate("/victim-signup");
   };
 
   return (
@@ -14,21 +53,29 @@ const VictimLoginPage = () => {
         <h1 className="text-3xl font-bold text-green-600 text-center mb-6">
           Victim Login
         </h1>
-        <form className="space-y-4">
-          {/* Mobile Number Field */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Email Field */}
           <div>
             <label
-              htmlFor="mobile"
+              htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Mobile Number
+              Email Address
             </label>
             <input
-              type="text"
-              id="mobile"
-              name="mobile"
-              placeholder="Enter your mobile number"
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email address"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500"
+              required
             />
           </div>
 
@@ -44,8 +91,11 @@ const VictimLoginPage = () => {
               type="password"
               id="password"
               name="password"
+              value={formData.password}
+              onChange={handleChange}
               placeholder="Enter your password"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500"
+              required
             />
           </div>
 
