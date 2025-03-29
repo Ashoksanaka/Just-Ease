@@ -1,0 +1,9 @@
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('list-cases/', views.list_cases, name='list_cases'),  # This is the important line
+    path('create/', views.create_case, name='create_case'),
+    path('<int:pk>/', views.case_detail, name='case_detail'),
+]
