@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactQuill from 'react-quill-new';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,8 +9,7 @@ const CreateCase = () => {
   const [formData, setFormData] = useState({
     victimName: '',
     mobileNumber: '',
-    state: '',
-    nearestTown: '',
+    address: '', // Combined state and nearestTown
     statement: '',
     documents: [],
     videoFile: null
@@ -27,10 +26,6 @@ const CreateCase = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/victim-login");
-      return;
-    }
     const fetchLocationData = async () => {
       try {
         const response = await fetch('/india-states-towns.json');
@@ -45,30 +40,37 @@ const CreateCase = () => {
     fetchLocationData();
   }, [navigate]);
 
-
-
-
-  
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
+    setFormData((prevFormData) => {
+      const updatedFormData = {
+        ...prevFormData,
+        [name]: value
+      };
+
+      // Update address when state changes
+      if (name === 'state') {
+        fetch('/india-states-towns.json')
+          .then(response => response.json())
+          .then(data => {
+            setTowns(data[value]);
+            updatedFormData.address = `${value}, `; // Start address with state
+          })
+          .catch(error => console.error('Error fetching towns:', error));
+      }
+
+      return updatedFormData;
     });
     setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
+  };
 
-    if (name === 'state') {
-      fetch('/india-states-towns.json')
-        .then(response => response.json())
-        .then(data => {
-          setTowns(data[value]);
-          setFormData(prevFormData => ({
-            ...prevFormData,
-            nearestTown: ''
-          }));
-        })
-        .catch(error => console.error('Error fetching towns:', error));
-    }
+  const handleTownChange = (e) => {
+    const town = e.target.value;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      nearestTown: town,
+      address: `${prevFormData.state}, ${town}` // Update address with town
+    }));
   };
 
   const handleStatementChange = (content) => {
@@ -106,13 +108,8 @@ const CreateCase = () => {
       isValid = false;
     }
 
-    if (!formData.state) {
-      newErrors.state = 'State is required';
-      isValid = false;
-    }
-
-    if (!formData.nearestTown) {
-      newErrors.nearestTown = 'Nearest Town is required';
+    if (!formData.address) {
+      newErrors.address = 'Address (State and Town) is required';
       isValid = false;
     }
 
@@ -131,7 +128,7 @@ const CreateCase = () => {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('token'); // Get the token from localStorage
+      const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found.');
       }
@@ -139,8 +136,7 @@ const CreateCase = () => {
       const data = new FormData();
       data.append('victimName', formData.victimName);
       data.append('mobileNumber', formData.mobileNumber);
-      data.append('state', formData.state);
-      data.append('nearestTown', formData.nearestTown);
+      data.append('address', formData.address); // Use combined address
       data.append('statement', formData.statement);
 
       formData.documents.forEach((doc, index) => {
@@ -151,10 +147,10 @@ const CreateCase = () => {
         data.append('videoFile', formData.videoFile);
       }
 
-      await axios.post('http://localhost:8000/api/cases/create/', data, { //change the url to backend url
+      await axios.post('http://localhost:8000/api/cases/create-case/', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -162,8 +158,7 @@ const CreateCase = () => {
       setFormData({
         victimName: '',
         mobileNumber: '',
-        state: '',
-        nearestTown: '',
+        address: '',
         statement: '',
         documents: [],
         videoFile: null,
@@ -179,11 +174,9 @@ const CreateCase = () => {
           'Failed to create case. Please try again.'
       );
       if (error.response?.status === 401) {
-        // Handle unauthorized error (e.g., token expired)
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         localStorage.removeItem("refresh");
-        navigate("/victim-login");
       }
     } finally {
       setLoading(false);
@@ -191,8 +184,8 @@ const CreateCase = () => {
   };
 
   return (
-    <div className="min-h-screen bg-green-200 pt-16"> {/* Changed background color here and added min-h-screen */}
-      <div className="container mx-auto mb-5  ">
+    <div className="min-h-screen bg-green-200 pt-16">
+      <div className="container mx-auto mb-5">
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md">
           <h2 className="text-center bg-green-600 text-white p-4 rounded-t-lg">
             Create New Case
@@ -279,7 +272,7 @@ const CreateCase = () => {
                     name="nearestTown"
                     id="nearestTown"
                     value={formData.nearestTown}
-                    onChange={handleChange}
+                    onChange={handleTownChange} // Update to handle town change
                     required
                   >
                     <option value="">Select Town</option>

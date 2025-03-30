@@ -14,7 +14,7 @@ const VictimDashBoard = () => {
     const user = localStorage.getItem("user");
 
     if (!token) {
-      navigate("/victim-login");
+      navigate("/victim");
       return;
     }
 
@@ -30,7 +30,7 @@ const VictimDashBoard = () => {
       setLoadingCases(true);
       setCasesError(null);
       try {
-        const response = await axios.get("http://localhost:8000/api/cases/", {
+        const response = await axios.get("http://localhost:8000/api/cases/list-cases/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -46,7 +46,7 @@ const VictimDashBoard = () => {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           localStorage.removeItem("refresh");
-          navigate("/victim-login");
+          //navigate("/victim");
         }
       } finally {
         setLoadingCases(false);
@@ -60,7 +60,7 @@ const VictimDashBoard = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("refresh");
-    navigate("/victim-login");
+    navigate("/victim");
   };
 
   const handleCreateCase = () => {
@@ -110,7 +110,7 @@ const VictimDashBoard = () => {
               <ul>
                 {cases.map((caseItem) => (
                   <li key={caseItem.id} className="text-gray-600">
-                    Case ID: {caseItem.id} - Victim: {caseItem.victimName}
+                    Case ID: {caseItem.id} - Victim: {caseItem.victim_name}
                   </li>
                 ))}
               </ul>

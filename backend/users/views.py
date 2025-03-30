@@ -109,50 +109,6 @@ def verify_email_otp(request):
 
 
 @api_view(['POST'])
-def send_otp(request):
-    """Generate and send OTP to the user's email."""
-    email = request.data.get("email")
-
-    if not email:
-        return Response({"error": "Email is required"}, status=400)
-
-    try:
-        # Generate OTP
-        otp = ''.join(random.choices(string.digits, k=6))
-        # Save OTP in user's session
-        request.session['otp'] = otp
-        request.session['email'] = email
-        # Send OTP using email
-        # (You'll need to implement email sending logic here)
-        return Response({"message": "OTP sent successfully."})
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-
-@api_view(['POST'])
-def verify_otp(request):
-    """Verify OTP entered by the user."""
-    otp = request.data.get("otp")
-    email = request.session.get('email')
-
-    if not otp or not email:
-        return Response({"error": "OTP and email are required"}, status=400)
-
-    try:
-        # Get OTP from user's session
-        session_otp = request.session.get('otp')
-        if otp == session_otp:
-            # Verify user's email
-            user = CustomUser.objects.get(email=email)
-            user.is_verified = True
-            user.save()
-            return Response({"message": "Email verified successfully."})
-        else:
-            return Response({"error": "Invalid OTP"}, status=400)
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
-
-@api_view(['POST'])
 def login_user(request):
     """Authenticate a user and return a token."""
     email = request.data.get("email")

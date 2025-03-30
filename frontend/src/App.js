@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import WelcomePage from "./components/WelcomePage";
 import LawyerLoginPage from "./components/LawyerHomePage";
-import VictimLoginPage from "./components/VictimHomePage";
+import VictimLoginPage from "./components/VictimLoginPage";
 import VictimSignupPage from "./components/VictimSignupPage";
 import VictimDashBoard from "./components/VictimDashBoard";
 import CreateCase from "./components/CreateCase";

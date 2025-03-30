@@ -8,7 +8,10 @@ from .models import Case, CaseDocument, CaseVideo
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_case(request):
-    print("Creating case")
+    if not request.user.is_authenticated:
+        return Response({
+            'message': 'User must be logged in to create a case.'
+        }, status=status.HTTP_401_UNAUTHORIZED)
     try:
         # Extract basic case information
         victim_name = request.data.get('victimName')
@@ -22,7 +25,7 @@ def create_case(request):
                 'message': 'Victim name, mobile number, and address are required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create the case
+        # Create the case if user exists
         case = Case.objects.create(
             user=request.user,
             victim_name=victim_name,
@@ -30,7 +33,7 @@ def create_case(request):
             address=address,
             statement=statement
         )
-        
+        print(f"Case created: {case}")
         # Handle document uploads
         documents = []
         for key in request.FILES:
@@ -67,9 +70,11 @@ def create_case(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_cases(request):
+    print("Listing cases")
+    print(f"User: {request.user}")  # Log the user for debugging
     cases = Case.objects.filter(user=request.user).order_by('-created_at')
     
-    case_list = []
+    case_list = []  # Initialize the case list
     for case in cases:
         case_list.append({
             'id': case.id,
@@ -80,7 +85,8 @@ def list_cases(request):
             'document_count': case.documents.count(),
             'has_video': case.videos.exists()
         })
-    
+    print(case_list)
+    print(case_list)  # Log the case list for debugging
     return Response(case_list, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
@@ -92,8 +98,6 @@ def case_detail(request, case_id):
     documents = []
     for doc in case.documents.all():
         documents.append({
-            'id': doc.id,
-            'url': request.build_absolute_uri(doc.document.url),
             'uploaded_at': doc.uploaded_at
         })
     
