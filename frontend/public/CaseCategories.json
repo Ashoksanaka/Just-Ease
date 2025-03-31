@@ -1,0 +1,98 @@
+{
+    "Family Law": [
+        "Domestic Violence",
+        "Child Custody",
+        "Child Support",
+        "Divorce",
+        "Alimony/Spousal Support",
+        "Adoption",
+        "Protection Orders (Restraining Orders)"
+    ],
+    "Criminal Law": [
+        "Assault",
+        "Battery",
+        "Rape or Sexual Assault",
+        "Hate Crimes",
+        "Fraud",
+        "Theft or Burglary",
+        "Robbery",
+        "Drug Offenses",
+        "Murder or Attempted Murder",
+        "Harassment or Stalking",
+        "Identity Theft"
+    ],
+    "Civil Law": [
+        "Personal Injury",
+        "Wrongful Death",
+        "Medical Malpractice",
+        "Product Liability",
+        "Defamation (Slander or Libel)",
+        "Breach of Contract",
+        "Property Disputes",
+        "Landlord-Tenant Disputes",
+        "Consumer Protection (Fraud, Misrepresentation)",
+        "Employment Discrimination"
+    ],
+    "Immigration Law": [
+        "Asylum Applications",
+        "Green Card Applications",
+        "Deportation Defense",
+        "Work Visa Issues",
+        "Citizenship Applications",
+        "Refugee Status"
+    ],
+    "Labor and Employment Law": [
+        "Unlawful Termination (Wrongful Dismissal)",
+        "Workplace Harassment",
+        "Workplace Discrimination",
+        "Unpaid Wages or Overtime",
+        "Worker's Compensation Claims",
+        "Whistleblower Protection"
+    ],
+    "Property and Land Law": [
+        "Landlord-Tenant Disputes",
+        "Real Estate Transactions",
+        "Easements and Property Rights",
+        "Boundary Disputes",
+        "Foreclosure Defense",
+        "Zoning and Land Use"
+    ],
+    "Consumer Protection": [
+        "Fraudulent Business Practices",
+        "Unfair Trade Practices",
+        "Debt Collection",
+        "Credit Disputes",
+        "Identity Theft",
+        "False Advertising"
+    ],
+    "Environmental Law": [
+        "Environmental Pollution (Water, Air, Land)",
+        "Wildlife Protection",
+        "Toxic Waste and Chemical Exposure",
+        "Climate Change Litigation",
+        "Land Use and Zoning Disputes"
+    ],
+    "Education Law": [
+        "School Bullying",
+        "Discrimination in Education",
+        "Special Education Disputes",
+        "Student Rights",
+        "Teacher and Staff Disputes",
+        "School Suspension or Expulsion"
+    ],
+    "Business and Corporate Law": [
+        "Business Fraud",
+        "Partnership Disputes",
+        "Intellectual Property (Patent, Trademark, Copyright)",
+        "Mergers and Acquisitions",
+        "Breach of Contract",
+        "Employment Law (Within Corporations)"
+    ],
+    "Financial and Debt Law": [
+        "Bankruptcy",
+        "Debt Collection",
+        "Credit Disputes",
+        "Financial Fraud",
+        "Investment Fraud"
+    ]
+}

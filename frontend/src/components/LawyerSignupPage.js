@@ -1,0 +1,353 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Container, 
+  Typography, 
+  TextField, 
+  Button, 
+  Grid, 
+  Paper, 
+  Box,
+  FormHelperText,
+  InputLabel,
+  CircularProgress
+} from '@mui/material';
+
+const LawyerSignupPage = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    mobileNumber: '',
+    dateOfBirth: '',
+    barRegistrationId: '',
+    governmentIdProof: null,
+    lawyerIdProof: null
+  });
+  
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: null
+      });
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    
+    if (files.length > 0) {
+      const file = files[0];
+      
+      // Validate file is PDF
+      if (file.type !== 'application/pdf') {
+        setErrors({
+          ...errors,
+          [name]: 'Only PDF files are allowed'
+        });
+        return;
+      }
+      
+      setFormData({
+        ...formData,
+        [name]: file
+      });
+      
+      if (errors[name]) {
+        setErrors({
+          ...errors,
+          [name]: null
+        });
+      }
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    
+    if (!formData.mobileNumber.trim()) {
+      newErrors.mobileNumber = 'Mobile number is required';
+    } else if (!/^\d{10}$/.test(formData.mobileNumber)) {
+      newErrors.mobileNumber = 'Mobile number must be 10 digits';
+    }
+    
+    if (!formData.dateOfBirth) {
+      newErrors.dateOfBirth = 'Date of birth is required';
+    }
+    
+    if (!formData.barRegistrationId.trim()) {
+      newErrors.barRegistrationId = 'BAR registration ID is required';
+    }
+    
+    if (!formData.governmentIdProof) {
+      newErrors.governmentIdProof = 'Government ID proof is required';
+    }
+    
+    if (!formData.lawyerIdProof) {
+      newErrors.lawyerIdProof = 'Lawyer ID proof is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Replace the handleSubmit function with this updated version
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
+  
+  setLoading(true);
+  
+  try {
+    // Create FormData for file uploads
+    const data = new FormData();
+    
+    // Use the correct parameter names that match your Google Apps Script
+    data.append('Full_Name', formData.fullName);
+    data.append('Email_ID', formData.email);
+    data.append('Mobile_Number', formData.mobileNumber);
+    data.append('Date_of_Birth', formData.dateOfBirth);
+    data.append('BAR_registration_ID', formData.barRegistrationId);
+    
+    // For files, convert them to base64 and include file names
+    if (formData.governmentIdProof) {
+      const govIdBase64 = await convertFileToBase64(formData.governmentIdProof);
+      data.append('Government_ID_Proof', govIdBase64);
+      data.append('Government_ID_Proof_Name', formData.governmentIdProof.name);
+    }
+    
+    if (formData.lawyerIdProof) {
+      const lawyerIdBase64 = await convertFileToBase64(formData.lawyerIdProof);
+      data.append('Lawyer_ID_Proof', lawyerIdBase64);
+      data.append('Lawyer_ID_Proof_Name', formData.lawyerIdProof.name);
+    }
+    
+    // Send data to Google Sheets web app
+    await fetch(
+      'https://script.google.com/macros/s/AKfycbwwMlRJPtASkG_lu12v05KDdS2ggpQyj4CZai9QPBdt94ZA-1C8K7QnqGYKeEi2gcficQ/exec',
+      {
+        method: 'POST',
+        body: data,
+        mode: 'no-cors', // This is required for Google Apps Script
+      }
+    );
+    
+    // Since we're using no-cors, we can't check the response
+    // We'll assume it was successful if no error was thrown
+    setLoading(false);
+    alert('Registration successful! Your information has been submitted for verification.');
+    navigate('/login');
+    
+  } catch (error) {
+    setLoading(false);
+    setErrors({
+      ...errors,
+      submit: 'An error occurred during submission. Please try again.',
+    });
+    console.error('Submission error:', error);
+  }
+};
+
+  // Helper function to convert file to base64
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]); // Remove the data:application/pdf;base64, part
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  return (
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ p: 4, mt: 4, mb: 4 }}>
+        <Typography variant="h4" component="h1" align="center" gutterBottom>
+          Lawyer Registration
+        </Typography>
+        <Typography variant="body1" align="center" color="textSecondary" paragraph>
+          Join our platform to connect with clients and grow your practice
+        </Typography>
+        
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                name="fullName"
+                label="Full Name"
+                fullWidth
+                required
+                value={formData.fullName}
+                onChange={handleChange}
+                error={!!errors.fullName}
+                helperText={errors.fullName}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="email"
+                label="Email Address"
+                fullWidth
+                required
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                error={!!errors.email}
+                helperText={errors.email}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="mobileNumber"
+                label="Mobile Number"
+                fullWidth
+                required
+                type="tel"
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                error={!!errors.mobileNumber}
+                helperText={errors.mobileNumber}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="dateOfBirth"
+                label="Date of Birth"
+                type="date"
+                fullWidth
+                required
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                error={!!errors.dateOfBirth}
+                helperText={errors.dateOfBirth || "MM/DD/YYYY"}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="barRegistrationId"
+                label="BAR Registration ID"
+                fullWidth
+                required
+                value={formData.barRegistrationId}
+                onChange={handleChange}
+                error={!!errors.barRegistrationId}
+                helperText={errors.barRegistrationId}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <InputLabel htmlFor="governmentIdProof" required sx={{ mb: 1 }}>
+                Government ID Proof (PDF only)
+              </InputLabel>
+              <input
+                accept="application/pdf"
+                id="governmentIdProof"
+                name="governmentIdProof"
+                type="file"
+                onChange={handleFileChange}
+                style={{ width: '100%' }}
+              />
+              {errors.governmentIdProof && (
+                <FormHelperText error>{errors.governmentIdProof}</FormHelperText>
+              )}
+              <Typography variant="caption" color="textSecondary">
+                Upload Aadhar Card, PAN Card, Driving License, or Voter ID
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <InputLabel htmlFor="lawyerIdProof" required sx={{ mb: 1 }}>
+                Lawyer ID Proof (PDF only)
+              </InputLabel>
+              <input
+                accept="application/pdf"
+                id="lawyerIdProof"
+                name="lawyerIdProof"
+                type="file"
+                onChange={handleFileChange}
+                style={{ width: '100%' }}
+              />
+              {errors.lawyerIdProof && (
+                <FormHelperText error>{errors.lawyerIdProof}</FormHelperText>
+              )}
+            </Grid>
+            
+            {errors.submit && (
+              <Grid item xs={12}>
+                <Typography color="error" align="center">
+                  {errors.submit}
+                </Typography>
+              </Grid>
+            )}
+            
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={loading}
+                sx={{ mt: 2 }}
+              >
+                {loading ? (
+                  <>
+                    <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                    Submitting...
+                  </>
+                ) : 'Sign Up'}
+              </Button>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Box textAlign="center">
+                <Typography variant="body2">
+                  Already have an account?{' '}
+                  <Button
+                    color="primary"
+                    onClick={() => navigate('/lawyer')}
+                  >
+                    Sign In
+                  </Button>
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Paper>
+    </Container>
+  );
+};
+
+export default LawyerSignupPage;

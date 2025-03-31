@@ -1,6 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,9 +8,8 @@ const CreateCase = () => {
     victimName: '',
     mobileNumber: '',
     address: '', // Combined state and nearestTown
-    statement: '',
-    documents: [],
-    videoFile: null
+    category: '',
+    subCategories: []
   });
 
   const [loading, setLoading] = useState(false);
@@ -20,9 +17,8 @@ const CreateCase = () => {
   const [errors, setErrors] = useState({});
   const [states, setStates] = useState([]);
   const [towns, setTowns] = useState([]);
-
-  const documentsInputRef = useRef(null);
-  const videoInputRef = useRef(null);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -37,7 +33,19 @@ const CreateCase = () => {
       }
     };
 
+    const fetchCaseCategories = async () => {
+      try {
+        const response = await fetch('/CaseCategories.json');
+        const data = await response.json();
+        setCategories(Object.keys(data));
+        setSubCategories([]);
+      } catch (error) {
+        console.error('Error fetching case categories:', error);
+      }
+    };
+
     fetchLocationData();
+    fetchCaseCategories();
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -59,6 +67,17 @@ const CreateCase = () => {
           .catch(error => console.error('Error fetching towns:', error));
       }
 
+      // Update subCategories when category changes
+      if (name === 'category') {
+        fetch('/CaseCategories.json')
+          .then(response => response.json())
+          .then(data => {
+            setSubCategories(data[value]);
+            updatedFormData.subCategories = []; // Reset subcategories when category changes
+          })
+          .catch(error => console.error('Error fetching subcategories:', error));
+      }
+
       return updatedFormData;
     });
     setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
@@ -73,24 +92,23 @@ const CreateCase = () => {
     }));
   };
 
-  const handleStatementChange = (content) => {
-    setFormData({
-      ...formData,
-      statement: content
-    });
-  };
-
-  const handleDocumentsChange = (e) => {
-    setFormData({
-      ...formData,
-      documents: [...e.target.files]
-    });
-  };
-
-  const handleVideoChange = (e) => {
-    setFormData({
-      ...formData,
-      videoFile: e.target.files[0]
+  const handleSubCategoryChange = (subCategory) => {
+    setFormData((prevFormData) => {
+      const currentSubCategories = [...prevFormData.subCategories];
+      
+      if (currentSubCategories.includes(subCategory)) {
+        // Remove if already selected
+        return {
+          ...prevFormData,
+          subCategories: currentSubCategories.filter(item => item !== subCategory)
+        };
+      } else {
+        // Add if not already selected
+        return {
+          ...prevFormData,
+          subCategories: [...currentSubCategories, subCategory]
+        };
+      }
     });
   };
 
@@ -110,6 +128,16 @@ const CreateCase = () => {
 
     if (!formData.address) {
       newErrors.address = 'Address (State and Town) is required';
+      isValid = false;
+    }
+
+    if (!formData.category) {
+      newErrors.category = 'Case Category is required';
+      isValid = false;
+    }
+
+    if (formData.subCategories.length === 0) {
+      newErrors.subCategories = 'At least one Sub-Category must be selected';
       isValid = false;
     }
 
@@ -137,15 +165,10 @@ const CreateCase = () => {
       data.append('victimName', formData.victimName);
       data.append('mobileNumber', formData.mobileNumber);
       data.append('address', formData.address); // Use combined address
-      data.append('statement', formData.statement);
-
-      formData.documents.forEach((doc, index) => {
-        data.append(`document_${index}`, doc);
+      data.append('category', formData.category);
+      formData.subCategories.forEach(subCategory => {
+        data.append('subCategories', subCategory);
       });
-
-      if (formData.videoFile) {
-        data.append('videoFile', formData.videoFile);
-      }
 
       await axios.post('http://localhost:8000/api/cases/create-case/', data, {
         headers: {
@@ -159,14 +182,10 @@ const CreateCase = () => {
         victimName: '',
         mobileNumber: '',
         address: '',
-        statement: '',
-        documents: [],
-        videoFile: null,
+        category: '',
+        subCategories: []
       });
       setErrors({});
-
-      if (documentsInputRef.current) documentsInputRef.current.value = '';
-      if (videoInputRef.current) videoInputRef.current.value = '';
     } catch (error) {
       console.error('Error creating case:', error);
       setMessage(
@@ -272,7 +291,7 @@ const CreateCase = () => {
                     name="nearestTown"
                     id="nearestTown"
                     value={formData.nearestTown}
-                    onChange={handleTownChange} // Update to handle town change
+                    onChange={handleTownChange}
                     required
                   >
                     <option value="">Select Town</option>
@@ -286,52 +305,52 @@ const CreateCase = () => {
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label className="form-label block mb-2" htmlFor="statement">
-                  Statement of Injustice
-                </label>
-                <ReactQuill
-                  theme="snow"
-                  value={formData.statement}
-                  onChange={handleStatementChange}
-                />
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="mb-3">
-                  <label className="form-label block mb-2" htmlFor="documents">
-                    Upload Documents
+                  <label className="form-label block mb-2" htmlFor="category">
+                    Case Category
                   </label>
-                  <input
-                    className="form-control w-full"
-                    type="file"
-                    ref={documentsInputRef}
-                    id="documents"
-                    onChange={handleDocumentsChange}
-                    multiple
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  />
-                  <p className="text-muted mt-1">
-                    Upload relevant documents related to the case (PDF, DOC, DOCX,
-                    JPG, PNG)
-                  </p>
+                  <select
+                    className={`form-control w-full px-3 py-2 border ${errors.category ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                    name="category"
+                    id="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Case Category</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label block mb-2" htmlFor="videoFile">
-                    Upload Video Evidence
+                  <label className="form-label block mb-2">
+                    Sub-Categories (Select all that apply)
                   </label>
-                  <input
-                    className="form-control w-full"
-                    type="file"
-                    ref={videoInputRef}
-                    id="videoFile"
-                    onChange={handleVideoChange}
-                    accept="video/*"
-                  />
-                  <p className="text-muted mt-1">
-                    Upload any video evidence related to the case (MP4, MOV, AVI)
-                  </p>
+                  <div className={`border ${errors.subCategories ? 'border-red-500' : 'border-gray-300'} rounded-md p-3 max-h-40 overflow-y-auto`}>
+                    {subCategories.length > 0 ? (
+                      subCategories.map((subCategory) => (
+                        <div key={subCategory} className="flex items-center mb-2">
+                          <input
+                            type="checkbox"
+                            id={`subCategory-${subCategory}`}
+                            checked={formData.subCategories.includes(subCategory)}
+                            onChange={() => handleSubCategoryChange(subCategory)}
+                            className="mr-2"
+                          />
+                          <label htmlFor={`subCategory-${subCategory}`}>{subCategory}</label>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500">Select a category first</p>
+                    )}
+                  </div>
+                  {errors.subCategories && <p className="text-red-500 text-sm">{errors.subCategories}</p>}
                 </div>
               </div>
 
