@@ -83,3 +83,31 @@ def case_detail(request, pk):
     }
     
     return Response(case_data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def explore_cases(request):
+    """
+    Endpoint to fetch all cases for exploration.
+    This can be used by authorized users to view all cases in the system.
+    """
+    # You might want to add pagination for large datasets
+    cases = Case.objects.all().order_by('-created_at')
+    
+    # Convert cases to a list of dictionaries
+    case_list = []
+    for case in cases:
+        case_list.append({
+            'id': case.id,
+            'victim_name': case.victim_name,
+            'mobile_number': case.mobile_number,
+            'address': case.address,
+            'category': case.category,
+            'subcategories': case.subcategories,
+            'status': case.status,
+            'created_at': case.created_at,
+            'updated_at': case.updated_at,
+            'user_id': case.user.id,
+            'user_name': case.user.username  # Include the username of who created the case
+        })
+    
+    return Response(case_list, status=status.HTTP_200_OK)

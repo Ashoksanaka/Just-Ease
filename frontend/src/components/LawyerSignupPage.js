@@ -27,6 +27,9 @@ const LawyerSignupPage = () => {
   
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,7 +38,11 @@ const LawyerSignupPage = () => {
       [name]: value
     });
     
-    // Clear error when user types
+    if (name === 'email') {
+      setIsEmailVerified(false);
+      setCodeSent(false);
+    }
+
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -50,7 +57,6 @@ const LawyerSignupPage = () => {
     if (files.length > 0) {
       const file = files[0];
       
-      // Validate file is PDF
       if (file.type !== 'application/pdf') {
         setErrors({
           ...errors,
@@ -73,6 +79,69 @@ const LawyerSignupPage = () => {
     }
   };
 
+  const handleSendVerificationCode = async () => {
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setErrors({ ...errors, email: 'Please enter a valid email address' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/users/send_email_verification/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send verification code');
+      }
+
+      setCodeSent(true);
+      setErrors({ ...errors, email: null });
+      alert('Verification code sent to your email');
+    } catch (error) {
+      setErrors({ ...errors, email: error.message });
+    }
+    setLoading(false);
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verificationCode) {
+      alert('Please enter verification code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/users/verify_email_otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: verificationCode
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Verification failed');
+      }
+
+      setIsEmailVerified(true);
+      alert('Email verified successfully!');
+    } catch (error) {
+      setErrors({ ...errors, email: error.message });
+      setIsEmailVerified(false);
+    }
+    setLoading(false);
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -82,8 +151,8 @@ const LawyerSignupPage = () => {
     
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    } else if (!isEmailVerified) {
+      newErrors.email = 'Email must be verified';
     }
     
     if (!formData.mobileNumber.trim()) {
@@ -112,72 +181,63 @@ const LawyerSignupPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Replace the handleSubmit function with this updated version
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    return;
-  }
-  
-  setLoading(true);
-  
-  try {
-    // Create FormData for file uploads
-    const data = new FormData();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    // Use the correct parameter names that match your Google Apps Script
-    data.append('Full_Name', formData.fullName);
-    data.append('Email_ID', formData.email);
-    data.append('Mobile_Number', formData.mobileNumber);
-    data.append('Date_of_Birth', formData.dateOfBirth);
-    data.append('BAR_registration_ID', formData.barRegistrationId);
-    
-    // For files, convert them to base64 and include file names
-    if (formData.governmentIdProof) {
-      const govIdBase64 = await convertFileToBase64(formData.governmentIdProof);
-      data.append('Government_ID_Proof', govIdBase64);
-      data.append('Government_ID_Proof_Name', formData.governmentIdProof.name);
+    if (!validateForm()) {
+      return;
     }
     
-    if (formData.lawyerIdProof) {
-      const lawyerIdBase64 = await convertFileToBase64(formData.lawyerIdProof);
-      data.append('Lawyer_ID_Proof', lawyerIdBase64);
-      data.append('Lawyer_ID_Proof_Name', formData.lawyerIdProof.name);
-    }
+    setLoading(true);
     
-    // Send data to Google Sheets web app
-    await fetch(
-      'https://script.google.com/macros/s/AKfycbwwMlRJPtASkG_lu12v05KDdS2ggpQyj4CZai9QPBdt94ZA-1C8K7QnqGYKeEi2gcficQ/exec',
-      {
-        method: 'POST',
-        body: data,
-        mode: 'no-cors', // This is required for Google Apps Script
+    try {
+      const data = new FormData();
+      data.append('Full_Name', formData.fullName);
+      data.append('Email_ID', formData.email);
+      data.append('Mobile_Number', formData.mobileNumber);
+      data.append('Date_of_Birth', formData.dateOfBirth);
+      data.append('BAR_registration_ID', formData.barRegistrationId);
+      
+      if (formData.governmentIdProof) {
+        const govIdBase64 = await convertFileToBase64(formData.governmentIdProof);
+        data.append('Government_ID_Proof', govIdBase64);
+        data.append('Government_ID_Proof_Name', formData.governmentIdProof.name);
       }
-    );
-    
-    // Since we're using no-cors, we can't check the response
-    // We'll assume it was successful if no error was thrown
-    setLoading(false);
-    alert('Registration successful! Your information has been submitted for verification.');
-    navigate('/login');
-    
-  } catch (error) {
-    setLoading(false);
-    setErrors({
-      ...errors,
-      submit: 'An error occurred during submission. Please try again.',
-    });
-    console.error('Submission error:', error);
-  }
-};
+      
+      if (formData.lawyerIdProof) {
+        const lawyerIdBase64 = await convertFileToBase64(formData.lawyerIdProof);
+        data.append('Lawyer_ID_Proof', lawyerIdBase64);
+        data.append('Lawyer_ID_Proof_Name', formData.lawyerIdProof.name);
+      }
+      
+      await fetch(
+        'https://script.google.com/macros/s/AKfycbwwMlRJPtASkG_lu12v05KDdS2ggpQyj4CZai9QPBdt94ZA-1C8K7QnqGYKeEi2gcficQ/exec',
+        {
+          method: 'POST',
+          body: data,
+          mode: 'no-cors',
+        }
+      );
+      
+      setLoading(false);
+      alert('Registration successful! Your information has been submitted for verification.');
+      navigate('/login');
+      
+    } catch (error) {
+      setLoading(false);
+      setErrors({
+        ...errors,
+        submit: 'An error occurred during submission. Please try again.',
+      });
+      console.error('Submission error:', error);
+    }
+  };
 
-  // Helper function to convert file to base64
   const convertFileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(',')[1]); // Remove the data:application/pdf;base64, part
+      reader.onload = () => resolve(reader.result.split(',')[1]);
       reader.onerror = error => reject(error);
     });
   };
@@ -218,8 +278,42 @@ const handleSubmit = async (e) => {
                 onChange={handleChange}
                 error={!!errors.email}
                 helperText={errors.email}
+                disabled={isEmailVerified}
               />
+              {!isEmailVerified && (
+                <Box mt={1}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleSendVerificationCode}
+                    disabled={!formData.email || loading}
+                  >
+                    {loading ? 'Sending...' : 'Send Verification Code'}
+                  </Button>
+                </Box>
+              )}
             </Grid>
+            
+            {codeSent && !isEmailVerified && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Verification Code"
+                  fullWidth
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  disabled={loading}
+                  helperText="Enter 6-digit code sent to your email"
+                />
+                <Box mt={1}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleVerifyCode}
+                    disabled={!verificationCode || loading}
+                  >
+                    {loading ? 'Verifying...' : 'Verify Code'}
+                  </Button>
+                </Box>
+              </Grid>
+            )}
             
             <Grid item xs={12} sm={6}>
               <TextField
@@ -318,7 +412,7 @@ const handleSubmit = async (e) => {
                 variant="contained"
                 color="primary"
                 size="large"
-                disabled={loading}
+                disabled={loading || !isEmailVerified}
                 sx={{ mt: 2 }}
               >
                 {loading ? (

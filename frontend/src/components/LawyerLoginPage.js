@@ -5,7 +5,7 @@ import axios from "axios";
 const LawyerLoginPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    lawyerId: "", // Changed from email to lawyerId
+    email: "", // Changed from lawyerId to email
     password: "",
   });
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ const LawyerLoginPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/lawyers/login/", // Changed endpoint
+        "http://localhost:8000/api/users/login/", // This endpoint matches the login_user view in backend/users/views.py
         formData
       );
       console.log("Lawyer Login response:", response.data);
@@ -36,7 +36,7 @@ const LawyerLoginPage = () => {
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
       // Redirect to dashboard
-      navigate("/lawyer-dashboard"); // Changed route
+      navigate("/lawyer-dashboard");
     } catch (err) {
       console.error("Lawyer Login error:", err.response?.data || err.message);
       setError(err.response?.data?.error || "Login failed. Please try again.");
@@ -44,13 +44,13 @@ const LawyerLoginPage = () => {
   };
 
   const handleCreateAccount = () => {
-    navigate("/lawyer-signup"); // Changed route
+    navigate("/lawyer-signup");
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-blue-100"> {/* Changed background color */}
+    <div className="flex items-center justify-center h-screen bg-blue-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h1 className="text-3xl font-bold text-blue-600 text-center mb-6"> {/* Changed text color */}
+        <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
           Lawyer Login
         </h1>
         {error && (
@@ -59,22 +59,22 @@ const LawyerLoginPage = () => {
           </div>
         )}
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Lawyer ID Field */}
+          {/* Email Field - Changed from Lawyer ID */}
           <div>
             <label
-              htmlFor="lawyerId" // Changed htmlFor
+              htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Just-Ease ID {/* Changed label */}
+              Email Address
             </label>
             <input
-              type="text" // Changed type
-              id="lawyerId" // Changed id
-              name="lawyerId" // Changed name
-              value={formData.lawyerId} // Changed value
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your Just-Ease ID"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" // Changed focus color
+              placeholder="Enter your email address"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
@@ -94,7 +94,7 @@ const LawyerLoginPage = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" // Changed focus color
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
@@ -102,7 +102,7 @@ const LawyerLoginPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-lg font-medium hover:bg-blue-600 transition-all duration-300" // Changed button color
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg text-lg font-medium hover:bg-blue-600 transition-all duration-300"
           >
             Login
           </button>
@@ -113,7 +113,7 @@ const LawyerLoginPage = () => {
           <p className="text-sm text-gray-600">Don't have an account?</p>
           <button
             onClick={handleCreateAccount}
-            className="mt-2 text-blue-600 font-medium hover:underline block" // Changed text color
+            className="mt-2 text-blue-600 font-medium hover:underline block"
           >
             Create Account
           </button>
