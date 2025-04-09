@@ -30,7 +30,7 @@ const VictimDashBoard = () => {
       setLoadingCases(true);
       setCasesError(null);
       try {
-        const response = await axios.get("http://localhost:8000/api/cases/list-cases/", {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/cases/list-cases/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

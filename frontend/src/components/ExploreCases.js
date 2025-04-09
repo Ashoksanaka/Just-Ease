@@ -51,7 +51,7 @@ const ExploreCases = () => {
         return;
       }
 
-      const response = await axios.get("http://localhost:8000/api/cases/explore/", {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/cases/explore/`, {
         headers: {
           'Authorization': `Token ${token}`
         }

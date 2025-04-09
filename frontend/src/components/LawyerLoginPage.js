@@ -25,7 +25,7 @@ const LawyerLoginPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/login/", // This endpoint matches the login_user view in backend/users/views.py
+        `${process.env.REACT_APP_API_BASE_URL}/api/users/login/`,
         formData
       );
       console.log("Lawyer Login response:", response.data);

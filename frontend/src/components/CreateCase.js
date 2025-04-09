@@ -170,7 +170,7 @@ const CreateCase = () => {
         data.append('subCategories', subCategory);
       });
 
-      await axios.post('http://localhost:8000/api/cases/create-case/', data, {
+      await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/cases/create-case/`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,

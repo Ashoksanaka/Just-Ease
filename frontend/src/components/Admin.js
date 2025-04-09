@@ -63,7 +63,7 @@ const Admin = () => {
     
     try {
       // Using the signup endpoint from backend/users/views.py
-      const response = await axios.post("http://127.0.0.1:8000/api/users/signup/", {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/signup/`, {
         first_name: firstName,
         last_name: lastName,
         email: email,

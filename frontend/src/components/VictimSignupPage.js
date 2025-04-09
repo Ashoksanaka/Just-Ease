@@ -56,7 +56,7 @@ const VictimSignupPage = () => {
 
   const sendEmailVerification = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/users/send_email_verification/", { email: email });
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/send_email_verification/`, { email: email });
       if (response.status === 200) {
         setErrorMessage(""); // Clear any previous errors
         setSuccessMessage("Verification OTP sent to your email. Please check your inbox.");
@@ -70,7 +70,7 @@ const VictimSignupPage = () => {
 
   const verifyEmailOtp = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/users/verify_email_otp/", { 
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/verify_email_otp/`, { 
         email: email,
         otp: otp 
       });
@@ -102,7 +102,7 @@ const VictimSignupPage = () => {
     }
     
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/users/signup/", {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/signup/`, {
         first_name: firstName,
         last_name: lastName,
         email: email,

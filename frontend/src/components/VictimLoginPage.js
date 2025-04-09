@@ -25,7 +25,7 @@ const VictimLoginPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/login/",
+        `${process.env.REACT_APP_API_BASE_URL}/api/users/login/`,
         formData
       );
       console.log("Login response:", response.data);
