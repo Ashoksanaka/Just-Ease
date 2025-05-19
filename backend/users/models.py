@@ -33,17 +33,3 @@ class EmailOTP(models.Model):
         # Use Django's timezone-aware now() for comparison
         return timezone.now() > self.expiry_time
 
-
-class OTP(models.Model):
-    mobile_number = models.CharField(max_length=15)
-    otp_code = models.CharField(max_length=6)
-    expiry_time = models.DateTimeField()
-
-    def generate_otp(self):
-        """Generate a random 6-digit OTP"""
-        self.otp_code = ''.join(random.choices(string.digits, k=6))
-        # Use Django's timezone-aware now()
-        self.expiry_time = timezone.now() + timedelta(minutes=5)
-
-    def is_expired(self):
-        return timezone.now() > self.expiry_time
