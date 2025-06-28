@@ -122,8 +122,8 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'JustEase',  # Database name
-        'USER': 'postgres',  # PostgreSQL username
+        'NAME': 'justeasedb',  # Database name
+        'USER': 'ashoksanaka',  # PostgreSQL username
         'PASSWORD': 'Ashok@1#8$0_5',  # PostgreSQL password
         'HOST': 'localhost',  # Database host
         'PORT': '5432',  # Database port
@@ -135,9 +135,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # or your email provider's SMTP server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'ece202.2021@anits.edu.in'  # replace with your email
-EMAIL_HOST_PASSWORD = 'Ashok@1#8$0_5'  # replace with your app password
-DEFAULT_FROM_EMAIL = 'ece202.2021@anits.edu.in'  # replace with your email
+EMAIL_HOST_USER = 'justease9@gmail.com'  # replace with your email
+EMAIL_HOST_PASSWORD = 'iyko gnra hubv xxgi'  # replace with your app password
+DEFAULT_FROM_EMAIL = 'justease9@gmail.com'  # replace with your email
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

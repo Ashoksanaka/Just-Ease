@@ -68,7 +68,7 @@ def send_email_verification(request):
         
         # Send OTP via email
         subject = 'Just-Ease Email Verification'
-        message = f'Your verification OTP is: {otp}. It will expire in 10 minutes.'
+        message = f'Thank you for using JustEase.\n Your verification OTP is: {otp}. It will expire in 10 minutes.'
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [email]
         

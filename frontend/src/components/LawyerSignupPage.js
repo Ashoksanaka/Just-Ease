@@ -221,7 +221,7 @@ const LawyerSignupPage = () => {
       
       setLoading(false);
       alert('Registration successful! Your information has been submitted for verification.');
-      navigate('/login');
+      navigate('/lawyer');
       
     } catch (error) {
       setLoading(false);
