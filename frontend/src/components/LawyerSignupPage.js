@@ -210,18 +210,28 @@ const LawyerSignupPage = () => {
         data.append('Lawyer_ID_Proof_Name', formData.lawyerIdProof.name);
       }
       
-      await fetch(
-        'https://script.google.com/macros/s/AKfycbwwMlRJPtASkG_lu12v05KDdS2ggpQyj4CZai9QPBdt94ZA-1C8K7QnqGYKeEi2gcficQ/exec',
-        {
-          method: 'POST',
-          body: data,
-          mode: 'no-cors',
-        }
-      );
-      
-      setLoading(false);
-      alert('Registration successful! Your information has been submitted for verification.');
-      navigate('/lawyer');
+      // --- CHANGE THIS URL ---
+      // Replace with the Google Apps Script Web App URL you copied in Step 3.
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqjfy3YOzyvZEnPBPwbxp-cumRiEO2WyUGhcWNQ5nBxLxhVBbuyt1idCFDkx-ggzZB6Q/exec';
+
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: data,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.result === 'success') {
+        setLoading(false);
+        alert('Registration successful! Your information has been submitted for verification.');
+        navigate('/lawyer');
+      } else {
+        throw new Error(result.error || 'An unknown error occurred in the script.');
+      }
       
     } catch (error) {
       setLoading(false);

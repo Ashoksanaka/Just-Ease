@@ -122,7 +122,7 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'justeasedb',  # Database name
+        'NAME': 'justice_db',  # Database name
         'USER': 'ashoksanaka',  # PostgreSQL username
         'PASSWORD': 'Ashok@1#8$0_5',  # PostgreSQL password
         'HOST': 'localhost',  # Database host
@@ -136,7 +136,7 @@ EMAIL_HOST = 'smtp.gmail.com'  # or your email provider's SMTP server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'justease9@gmail.com'  # replace with your email
-EMAIL_HOST_PASSWORD = 'iyko gnra hubv xxgi'  # replace with your app password
+EMAIL_HOST_PASSWORD = 'vpea vomw csoj rdhp'  # replace with your app password
 DEFAULT_FROM_EMAIL = 'justease9@gmail.com'  # replace with your email
 
 # Password validation

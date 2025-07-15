@@ -44,7 +44,7 @@ const LawyerDashBoard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
       <header className="bg-blue-600 text-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -64,7 +64,7 @@ const LawyerDashBoard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Welcome to Your Dashboard
