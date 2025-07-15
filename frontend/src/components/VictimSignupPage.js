@@ -276,7 +276,10 @@ const VictimSignupPage = () => {
               setShowConfirmDialog(false);
               navigate("/victim");
             }}
-            onCancel={() => setShowConfirmDialog(false)}
+            onCancel={() => {
+              setShowConfirmDialog(false);
+              navigate("/");
+            }}
           />
         )}
       </div>
