@@ -68,11 +68,13 @@ const Admin = () => {
         last_name: lastName,
         email: email,
         password: password,
+        isVictim: false,
+        isLawyer: true,
       });
       
       if (response.status === 200) {
         setErrorMessage("");
-        setSuccessMessage("Admin created successfully!");
+        setSuccessMessage("Lawyer created successfully!");
         // Clear form fields after successful submission
         setFirstName("");
         setLastName("");

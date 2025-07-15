@@ -24,22 +24,26 @@ const LawyerLoginPage = () => {
     console.log("Sending lawyer login request with data:", formData);
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/api/users/login/`,
-        formData
-      );
-      console.log("Lawyer Login response:", response.data);
+        const response = await axios.post(
+            `${process.env.REACT_APP_API_BASE_URL}/api/users/login/`,
+            formData
+        );
+        console.log("Lawyer Login response:", response.data);
 
-      // Store authentication data in localStorage
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("refresh", response.data.refresh);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+        // Store authentication data in localStorage
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("refresh", response.data.refresh);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Redirect to dashboard
-      navigate("/lawyer-dashboard");
+        // Redirect based on user type
+        if (response.data.user.user_type === "lawyer") {
+            navigate("/lawyer-dashboard");
+        } else {
+            setError("Unauthorized access. You are not a lawyer.");
+        }
     } catch (err) {
-      console.error("Lawyer Login error:", err.response?.data || err.message);
-      setError(err.response?.data?.error || "Login failed. Please try again.");
+        console.error("Lawyer Login error:", err.response?.data || err.message);
+        setError(err.response?.data?.error || "Login failed. Please try again.");
     }
   };
 

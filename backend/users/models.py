@@ -8,6 +8,8 @@ from django.utils import timezone  # Import timezone from Django
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
+    is_victim = models.BooleanField(default=False)  # New field
+    is_lawyer = models.BooleanField(default=False)  # New field
     groups = models.ManyToManyField(
         Group, related_name='customuser_set', blank=True
     )

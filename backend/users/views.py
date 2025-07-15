@@ -22,6 +22,8 @@ def signup(request):
     password = request.data.get("password")
     first_name = request.data.get("first_name")
     last_name = request.data.get("last_name")
+    is_victim = request.data.get("isVictim", False)
+    is_lawyer = request.data.get("isLawyer", False)
 
     if not email or not password:
         return Response({"error": "Email and password are required"}, status=400)
@@ -41,7 +43,9 @@ def signup(request):
             password=password,
             first_name=first_name,
             last_name=last_name,
-            is_verified=True
+            is_verified=True,
+            is_victim=is_victim,
+            is_lawyer=is_lawyer
         )
         user.save()
         return Response({"message": "User created successfully."})
@@ -133,6 +137,14 @@ def login_user(request):
         if not user.check_password(password):
             return Response({"error": "Incorrect password"}, status=401)
         
+        # Check user type
+        if user.is_victim:
+            user_type = "victim"
+        elif user.is_lawyer:
+            user_type = "lawyer"
+        else:
+            return Response({"error": "User type not recognized."}, status=401)
+        
         # Generate token
         refresh = RefreshToken.for_user(user)
         
@@ -144,7 +156,8 @@ def login_user(request):
                 "id": user.id,
                 "email": user.email,
                 "first_name": user.first_name,
-                "last_name": user.last_name
+                "last_name": user.last_name,
+                "user_type": user_type  # Include user type in the response
             }
         })
     except Exception as e:

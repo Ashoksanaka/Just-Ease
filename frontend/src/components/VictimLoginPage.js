@@ -35,8 +35,12 @@ const VictimLoginPage = () => {
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Redirect to dashboard
-      navigate("/victim-dashboard");
+      // Redirect based on user type
+      if (response.data.user.user_type === "victim") {
+        navigate("/victim-dashboard");
+      } else {
+        setError("Unauthorized access. You are not a victim.");
+      }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       setError(err.response?.data?.error || "Login failed. Please try again.");

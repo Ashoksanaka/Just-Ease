@@ -135,6 +135,8 @@ const VictimSignupPage = () => {
         last_name: lastName,
         email: email,
         password: password,
+        isVictim: true,
+        isLawyer: false,
       });
       if (response.status === 200) {
         setErrorMessage("");
