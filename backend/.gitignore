@@ -1,6 +1,6 @@
 
 # Virtual Environment
-venv/
+justice_venv/
 
 # Python cache
 *.pyc
