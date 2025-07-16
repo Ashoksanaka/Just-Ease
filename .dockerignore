@@ -1,0 +1,12 @@
+# Ignore Python virtual environments
+backend/justice_venv/
+
+# Ignore Node modules
+frontend/node_modules/
+
+# Ignore other common files
+.git
+.env
+*.pyc
+__pycache__/
+.DS_Store

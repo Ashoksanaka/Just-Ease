@@ -21,14 +21,16 @@ const LawyerLoginPage = () => {
     e.preventDefault();
     setError("");
 
-    console.log("Sending lawyer login request with data:", formData);
+    
 
     try {
         const response = await axios.post(
             `${process.env.REACT_APP_API_BASE_URL}/api/users/login/`,
             formData
         );
+        console.log('API Base URL:', process.env.REACT_APP_API_BASE_URL);
         console.log("Lawyer Login response:", response.data);
+        
 
         // Store authentication data in localStorage
         localStorage.setItem("token", response.data.token);

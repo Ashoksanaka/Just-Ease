@@ -125,7 +125,7 @@ DATABASES = {
         'NAME': 'justice_db',  # Database name
         'USER': 'ashoksanaka',  # PostgreSQL username
         'PASSWORD': 'Ashok@1#8$0_5',  # PostgreSQL password
-        'HOST': 'localhost',  # Database host
+        'HOST': 'db',  # Database host
         'PORT': '5432',  # Database port
     }
 }
