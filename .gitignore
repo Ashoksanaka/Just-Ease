@@ -24,6 +24,5 @@ frontend/.next/
 frontend/build/
 
 # Ignore environment variables
-.env
-.env.local
+
 

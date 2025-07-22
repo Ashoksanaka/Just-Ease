@@ -2,7 +2,6 @@
 # Node.js modules
 node_modules/
 npm-debug.log
-.env.local
 
 # Build files
 build/
