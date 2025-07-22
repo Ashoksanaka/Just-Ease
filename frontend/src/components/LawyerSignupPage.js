@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
@@ -84,26 +85,16 @@ const LawyerSignupPage = () => {
       setErrors({ ...errors, email: 'Please enter a valid email address' });
       return;
     }
-
     setLoading(true);
     try {
-      const response = await fetch('${process.env.REACT_APP_API_BASE_URL}/api/users/send_email_verification/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.email }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send verification code');
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/send_email_verification/`, { email: formData.email });
+      if (response.status === 200) {
+        setCodeSent(true);
+        setErrors({ ...errors, email: null });
+        alert('Verification code sent to your email');
       }
-
-      setCodeSent(true);
-      setErrors({ ...errors, email: null });
-      alert('Verification code sent to your email');
     } catch (error) {
-      setErrors({ ...errors, email: error.message });
+      setErrors({ ...errors, email: error.response?.data?.error || error.message });
     }
     setLoading(false);
   };
@@ -113,30 +104,18 @@ const LawyerSignupPage = () => {
       alert('Please enter verification code');
       return;
     }
-
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/verify_email_otp/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          otp: verificationCode
-        }),
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/verify_email_otp/`, {
+        email: formData.email,
+        otp: verificationCode
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Verification failed');
+      if (response.status === 200) {
+        setIsEmailVerified(true);
+        alert('Email verified successfully!');
       }
-
-      setIsEmailVerified(true);
-      alert('Email verified successfully!');
     } catch (error) {
-      setErrors({ ...errors, email: error.message });
+      setErrors({ ...errors, email: error.response?.data?.error || error.message });
       setIsEmailVerified(false);
     }
     setLoading(false);
@@ -187,9 +166,7 @@ const LawyerSignupPage = () => {
     if (!validateForm()) {
       return;
     }
-    
     setLoading(true);
-    
     try {
       const data = new FormData();
       data.append('Full_Name', formData.fullName);
@@ -197,34 +174,21 @@ const LawyerSignupPage = () => {
       data.append('Mobile_Number', formData.mobileNumber);
       data.append('Date_of_Birth', formData.dateOfBirth);
       data.append('BAR_registration_ID', formData.barRegistrationId);
-      
       if (formData.governmentIdProof) {
         const govIdBase64 = await convertFileToBase64(formData.governmentIdProof);
         data.append('Government_ID_Proof', govIdBase64);
         data.append('Government_ID_Proof_Name', formData.governmentIdProof.name);
       }
-      
       if (formData.lawyerIdProof) {
         const lawyerIdBase64 = await convertFileToBase64(formData.lawyerIdProof);
         data.append('Lawyer_ID_Proof', lawyerIdBase64);
         data.append('Lawyer_ID_Proof_Name', formData.lawyerIdProof.name);
       }
-      
       // --- CHANGE THIS URL ---
       // Replace with the Google Apps Script Web App URL you copied in Step 3.
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqjfy3YOzyvZEnPBPwbxp-cumRiEO2WyUGhcWNQ5nBxLxhVBbuyt1idCFDkx-ggzZB6Q/exec';
-
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: data,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
+      const response = await axios.post(SCRIPT_URL, data);
+      const result = response.data;
       if (result.result === 'success') {
         setLoading(false);
         alert('Registration successful! Your information has been submitted for verification.');
@@ -232,7 +196,6 @@ const LawyerSignupPage = () => {
       } else {
         throw new Error(result.error || 'An unknown error occurred in the script.');
       }
-      
     } catch (error) {
       setLoading(false);
       setErrors({
