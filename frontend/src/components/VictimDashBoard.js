@@ -19,6 +19,10 @@ import {
   CheckCircle,
   AlertCircle,
   Phone,
+  Home,
+  Settings,
+  HelpCircle,
+  BookOpen,
 } from "lucide-react"
 
 const VictimDashBoard = () => {
@@ -28,6 +32,7 @@ const VictimDashBoard = () => {
   const [loadingCases, setLoadingCases] = useState(true)
   const [casesError, setCasesError] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [activeMenuItem, setActiveMenuItem] = useState("dashboard")
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -80,8 +85,56 @@ const VictimDashBoard = () => {
   }
 
   const handleCreateCase = () => {
+    setActiveMenuItem("create-case")
     navigate("/create-case")
   }
+
+  const handleMenuClick = (menuItem, action = null) => {
+    setActiveMenuItem(menuItem)
+    setSidebarOpen(false) // Close mobile sidebar
+    if (action) action()
+  }
+
+  const navigationItems = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: Home,
+      action: () => {},
+      active: true,
+    },
+    {
+      id: "messages",
+      label: "Messages",
+      icon: MessageSquare,
+      action: () => console.log("Messages clicked"),
+      badge: "3",
+    },
+    {
+      id: "appointments",
+      label: "Appointments",
+      icon: Calendar,
+      action: () => console.log("Appointments clicked"),
+    },
+    {
+      id: "resources",
+      label: "Support Resources",
+      icon: Heart,
+      action: () => console.log("Resources clicked"),
+    },
+    {
+      id: "documents",
+      label: "Documents",
+      icon: BookOpen,
+      action: () => console.log("Documents clicked"),
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      action: () => console.log("Settings clicked"),
+    },
+  ]
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -122,53 +175,66 @@ const VictimDashBoard = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
+        {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Shield className="w-8 h-8 text-green-600" />
             <span className="text-xl font-bold text-gray-900">JustEase</span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 rounded-md hover:bg-gray-100">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+            aria-label="Close sidebar"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
-          <div className="space-y-1">
-            <a
-              href="#"
-              className="flex items-center px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg"
-            >
-              <FileText className="w-5 h-5 mr-3" />
-              Dashboard
-            </a>
-            <a
-              href="#"
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <MessageSquare className="w-5 h-5 mr-3" />
-              Messages
-            </a>
-            <a
-              href="#"
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <Calendar className="w-5 h-5 mr-3" />
-              Appointments
-            </a>
-            <a
-              href="#"
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <Heart className="w-5 h-5 mr-3" />
-              Support Resources
-            </a>
-          </div>
+        {/* Navigation Menu */}
+        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+          {navigationItems.map((item) => {
+            const IconComponent = item.icon
+            const isActive = activeMenuItem === item.id
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleMenuClick(item.id, item.action)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
+                  isActive
+                    ? "bg-green-50 text-green-700 border-r-2 border-green-600"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <IconComponent
+                    className={`w-5 h-5 transition-colors ${
+                      isActive ? "text-green-600" : "text-gray-400 group-hover:text-gray-600"
+                    }`}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </div>
+
+                {item.badge && (
+                  <span
+                    className={`inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full ${
+                      isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </nav>
 
-        {/* Emergency Contact */}
-        <div className="absolute bottom-4 left-4 right-4">
+        {/* Emergency Contact Section */}
+        <div className="p-4 border-t border-gray-200">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Phone className="w-4 h-4 text-red-600" />
@@ -178,44 +244,79 @@ const VictimDashBoard = () => {
             <p className="text-xs text-red-700 mt-1">Crisis Helpline: 1-800-799-7233</p>
           </div>
         </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+              <HelpCircle className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-green-900">Need Support?</p>
+              <p className="text-xs text-green-700 truncate">We're here to help</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center space-x-4">
-              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-md hover:bg-gray-100">
-                <Menu className="w-5 h-5" />
+            {/* Left Section */}
+            <div className="flex items-center space-x-4 min-w-0 flex-1">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+                aria-label="Open sidebar"
+              >
+                <Menu className="w-5 h-5 text-gray-600" />
               </button>
-              <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+              <div className="min-w-0">
+                <h1 className="text-xl font-semibold text-gray-900 truncate">Dashboard</h1>
+                <p className="text-sm text-gray-500 hidden sm:block">Safe Space Portal</p>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            {/* Right Section */}
+            <div className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0">
+              {/* Notifications */}
+              <button
+                className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+                aria-label="View notifications"
+              >
                 <Bell className="w-5 h-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
               </button>
 
-              <div className="flex items-center space-x-3">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">
-                    {userData?.first_name} {userData?.last_name}
+              {/* User Profile Section */}
+              <div className="flex items-center space-x-3 pl-3 border-l border-gray-200">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900 truncate max-w-32">
+                    {userData?.first_name && userData?.last_name
+                      ? `${userData.first_name} ${userData.last_name}`
+                      : userData?.email || "User"}
                   </p>
                   <p className="text-xs text-gray-500">Protected User</p>
                 </div>
-                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-              </div>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
+                <div className="relative">
+                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -227,7 +328,7 @@ const VictimDashBoard = () => {
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
               <div className="flex items-center space-x-3 mb-4">
                 <Heart className="w-6 h-6" />
-                <h2 className="text-2xl font-bold">Welcome{userData ? `, ${userData.first_name}` : ""}</h2>
+                <h2 className="text-2xl font-bold">Welcome{userData?.first_name ? `, ${userData.first_name}` : ""}</h2>
               </div>
               <p className="text-green-100 mb-4">
                 You're in a safe space. We're here to support you through your legal journey and connect you with the
