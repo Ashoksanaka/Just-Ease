@@ -1,13 +1,14 @@
-FROM node:14
+# Use a smaller base image
+FROM node:14-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy only package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install only production dependencies
+RUN npm install --only=production
 
 # Copy the rest of the application code
 COPY . .
@@ -18,8 +19,8 @@ RUN npm run build
 # Install serve to serve the build
 RUN npm install -g serve
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Use a non-root user for better security
+USER node
 
 # Command to run the application
 CMD ["serve", "-s", "build"]
